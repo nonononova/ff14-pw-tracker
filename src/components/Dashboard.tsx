@@ -90,6 +90,13 @@ export const Dashboard: React.FC = () => {
   const idRunsNeeded = Math.ceil(totalTokensNeeded / 50);
   const exDaysNeeded = Math.ceil(totalTokensNeeded / 90);
 
+  // 𝕏（Twitter）シェア機能
+  const handleShare = () => {
+    const text = `✨【FF14】ファントムウェポン作成進捗\n\n・完成数: ${completedCount} / 21本\n・全体達成率: ${progressPercent}%\n・残り数理: ${totalTokensNeeded.toLocaleString()}個\n\n#FF14 #PWTracker #ファントムウェポン\n`;
+    const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
+    window.open(shareUrl, '_blank');
+  };
+
   const filterTabs: { id: FilterRole; label: string }[] = [
     { id: 'all', label: `すべて (${jobs.length})` },
     { id: 'pinned', label: `📌 メイン (${pinnedCount})` },
@@ -156,6 +163,14 @@ export const Dashboard: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* 𝕏 シェアボタン */}
+              <button
+                onClick={handleShare}
+                className="text-xs px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
+              >
+                <span>𝕏</span> シェア
+              </button>
 
               <button
                 onClick={handleReset}
@@ -238,7 +253,6 @@ export const Dashboard: React.FC = () => {
           ))}
         </main>
 
-        {/* フッター（権利表記・免責事項） */}
         <footer className={`pt-8 pb-4 text-center text-[11px] leading-relaxed space-y-1 ${
           isDarkMode ? 'text-slate-500' : 'text-slate-400'
         }`}>
