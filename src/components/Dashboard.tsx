@@ -160,9 +160,10 @@ export const Dashboard: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
+            {/* スマホ対応ヘッダー右エリア */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
               <div
-                className={`flex items-center gap-4 p-3 px-4 rounded-2xl border ${
+                className={`flex items-center justify-around sm:justify-start gap-4 p-2.5 px-4 rounded-2xl border ${
                   isDarkMode
                     ? 'bg-slate-900/60 border-slate-700'
                     : 'bg-pink-50/60 border-pink-100'
@@ -182,23 +183,26 @@ export const Dashboard: React.FC = () => {
                 </div>
               </div>
 
-              <button
-                onClick={handleShare}
-                className="text-xs px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
-              >
-                <span>𝕏</span> シェア
-              </button>
+              {/* ボタン2つをセットで横並び固定 */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleShare}
+                  className="flex-1 sm:flex-none justify-center text-xs px-3.5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
+                >
+                  <span>𝕏</span> シェア
+                </button>
 
-              <button
-                onClick={handleReset}
-                className={`text-xs px-3 py-2 rounded-xl border font-medium shadow-sm transition-colors ${
-                  isDarkMode
-                    ? 'bg-slate-700 border-slate-600 text-slate-400 hover:text-rose-400'
-                    : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500'
-                }`}
-              >
-                リセット
-              </button>
+                <button
+                  onClick={handleReset}
+                  className={`flex-1 sm:flex-none justify-center text-xs px-3 py-2.5 rounded-xl border font-medium shadow-sm transition-colors ${
+                    isDarkMode
+                      ? 'bg-slate-700 border-slate-600 text-slate-400 hover:text-rose-400'
+                      : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500'
+                  }`}
+                >
+                  リセット
+                </button>
+              </div>
             </div>
           </div>
 
@@ -236,9 +240,9 @@ export const Dashboard: React.FC = () => {
           </div>
         </header>
 
-        {/* フィルター ＆ 表示モード切り替えスイッチ */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-          <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 no-scrollbar flex-1">
+        {/* フィルター ＆ 表示モード切替（スマホで綺麗なレスポンシブ配置） */}
+        <div className="space-y-3">
+          <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 no-scrollbar">
             {filterTabs.map((tab) => (
               <button
                 key={tab.id}
@@ -256,10 +260,11 @@ export const Dashboard: React.FC = () => {
             ))}
           </div>
 
-          <div className={`flex items-center p-1 rounded-2xl border shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+          {/* 表示モードスイッチ（均等幅で余白を解消） */}
+          <div className={`flex items-center p-1 rounded-2xl border w-full sm:w-auto sm:inline-flex ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
             <button
               onClick={() => setViewMode('grid')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all text-center ${
                 viewMode === 'grid'
                   ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-600'
@@ -269,7 +274,7 @@ export const Dashboard: React.FC = () => {
             </button>
             <button
               onClick={() => setViewMode('compact')}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-1 sm:flex-none px-4 py-2 rounded-xl text-xs font-bold transition-all text-center ${
                 viewMode === 'compact'
                   ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-sm'
                   : 'text-slate-400 hover:text-slate-600'
