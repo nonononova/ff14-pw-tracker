@@ -36,7 +36,7 @@ export const JobCard: React.FC<JobCardProps> = ({
   const roleStyle = ROLE_COLORS[role];
   const tokensLeft = phase === 4 ? 0 : (4 - phase) * 1500;
 
-  // 📱 リスト表示（1行のスリム形式）
+  // 📱 リスト表示
   if (isCompact) {
     return (
       <div
@@ -48,6 +48,7 @@ export const JobCard: React.FC<JobCardProps> = ({
       >
         <div className="flex items-center gap-2.5 min-w-0">
           <button
+            type="button"
             onClick={onTogglePin}
             className={`text-xs transition-transform active:scale-75 ${
               isPinned ? 'opacity-100 scale-110' : 'opacity-30 hover:opacity-100'
@@ -71,6 +72,7 @@ export const JobCard: React.FC<JobCardProps> = ({
           {[0, 1, 2, 3, 4].map((p) => (
             <button
               key={p}
+              type="button"
               onClick={() => onPhaseChange(p)}
               className={`w-6 h-6 rounded-lg text-[10px] font-black transition-all active:scale-95 ${
                 phase === p
@@ -88,7 +90,7 @@ export const JobCard: React.FC<JobCardProps> = ({
     );
   }
 
-  // 🎴 カード表示（進捗バーが直接クリック可能なUI）
+  // 🎴 カード表示（進捗バー直接クリック対応）
   const getPhaseText = () => {
     if (phase === 0) return '未着手';
     if (phase === 4) return '完成！';
@@ -113,6 +115,7 @@ export const JobCard: React.FC<JobCardProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
+            type="button"
             onClick={onTogglePin}
             className={`text-xs transition-all active:scale-75 ${
               isPinned ? 'opacity-100 scale-110' : 'opacity-25 hover:opacity-100'
@@ -140,8 +143,8 @@ export const JobCard: React.FC<JobCardProps> = ({
         </span>
       </div>
 
-      {/* 中段：進捗度ラベル ＆ 4分割バー（直接クリック可能） */}
-      <div className="space-y-2">
+      {/* 中段：進捗度 ＆ 4分割バー（クリック可能） */}
+      <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className={isDarkMode ? 'text-slate-400' : 'text-slate-400'}>進捗度</span>
           <span className={phase === 4 ? 'text-emerald-500 font-bold' : phase > 0 ? 'text-pink-500 font-bold' : isDarkMode ? 'text-slate-400' : 'text-slate-500'}>
@@ -149,19 +152,18 @@ export const JobCard: React.FC<JobCardProps> = ({
           </span>
         </div>
 
-        {/* 4分割プログレスバー（クリックで直接切り替え＆ホバー演出追加） */}
-        <div className="grid grid-cols-4 gap-1.5">
+        {/* 4分割バー：ボタン化・マウス乗せると光る設定 */}
+        <div className="grid grid-cols-4 gap-1.5 py-1">
           {[1, 2, 3, 4].map((segment) => (
             <button
               key={segment}
               type="button"
               onClick={() => onPhaseChange(phase === segment ? segment - 1 : segment)}
-              title={`Phase ${segment} に変更`}
-              className={`h-3 rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 active:scale-95 ${
+              className={`h-4 sm:h-3.5 rounded-full transition-all duration-150 cursor-pointer touch-manipulation hover:opacity-80 active:scale-95 ${
                 phase >= segment
                   ? 'bg-gradient-to-r from-pink-400 to-rose-400 shadow-sm'
                   : isDarkMode
-                  ? 'bg-slate-700/70 hover:bg-slate-600'
+                  ? 'bg-slate-700/80 hover:bg-slate-600'
                   : 'bg-slate-100 hover:bg-slate-200'
               }`}
             />
@@ -172,6 +174,7 @@ export const JobCard: React.FC<JobCardProps> = ({
       {/* 下段：「戻す」＆「スタート/次へ」ボタン */}
       <div className="grid grid-cols-2 gap-2 pt-1">
         <button
+          type="button"
           onClick={() => onPhaseChange(phase - 1)}
           disabled={phase === 0}
           className={`py-2 rounded-2xl text-xs font-bold transition-all active:scale-95 ${
@@ -188,6 +191,7 @@ export const JobCard: React.FC<JobCardProps> = ({
         </button>
 
         <button
+          type="button"
           onClick={() => onPhaseChange(phase + 1)}
           disabled={phase === 4}
           className={`py-2 rounded-2xl text-xs font-bold transition-all ${
