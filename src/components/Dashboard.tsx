@@ -41,8 +41,8 @@ export const Dashboard: React.FC = () => {
   const [jobs, setJobs] = useLocalStorage<JobData[]>('ff14_pw_tracker_jobs', INITIAL_JOBS);
   const [activeFilter, setActiveFilter] = useState<FilterRole>('all');
   const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>('ff14_pw_tracker_darkmode', false);
+  const [viewMode, setViewMode] = useLocalStorage<'grid' | 'compact'>('ff14_pw_tracker_viewmode', 'grid');
   
-  const [viewMode, setViewMode] = useState<'grid' | 'compact'>('grid');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (message: string) => {
@@ -151,7 +151,6 @@ export const Dashboard: React.FC = () => {
                       ? 'bg-slate-700 border-slate-600 text-amber-300 hover:bg-slate-600'
                       : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
                   }`}
-                  title="テーマ切り替え"
                 >
                   {isDarkMode ? '🌙 ダーク' : '☀️ ライト'}
                 </button>
@@ -194,8 +193,8 @@ export const Dashboard: React.FC = () => {
                 onClick={handleReset}
                 className={`text-xs px-3 py-2 rounded-xl border font-medium shadow-sm transition-colors ${
                   isDarkMode
-                    ? 'bg-slate-700 border-slate-600 text-slate-400 hover:text-rose-400 hover:border-rose-900'
-                    : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200'
+                    ? 'bg-slate-700 border-slate-600 text-slate-400 hover:text-rose-400'
+                    : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500'
                 }`}
               >
                 リセット
@@ -237,7 +236,8 @@ export const Dashboard: React.FC = () => {
           </div>
         </header>
 
-        <div className="flex items-center justify-between gap-3">
+        {/* フィルター ＆ 表示モード切り替えスイッチ */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
           <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 no-scrollbar flex-1">
             {filterTabs.map((tab) => (
               <button
@@ -256,16 +256,28 @@ export const Dashboard: React.FC = () => {
             ))}
           </div>
 
-          <button
-            onClick={() => setViewMode(viewMode === 'grid' ? 'compact' : 'grid')}
-            className={`px-3.5 py-2 text-xs font-bold rounded-2xl border transition-all active:scale-95 shrink-0 ${
-              isDarkMode
-                ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
-                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            {viewMode === 'grid' ? '📱 リスト表示' : '🎴 カード表示'}
-          </button>
+          <div className={`flex items-center p-1 rounded-2xl border shrink-0 ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                viewMode === 'grid'
+                  ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              🎴 カード表示
+            </button>
+            <button
+              onClick={() => setViewMode('compact')}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                viewMode === 'compact'
+                  ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-slate-600'
+              }`}
+            >
+              📱 リスト表示
+            </button>
+          </div>
         </div>
 
         <main
