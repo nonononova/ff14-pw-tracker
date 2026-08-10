@@ -35,7 +35,6 @@ export const JobCard: React.FC<JobCardProps> = ({
 }) => {
   const roleStyle = ROLE_COLORS[role];
   const tokensLeft = phase === 4 ? 0 : (4 - phase) * 1500;
-  const progressPercent = (phase / 4) * 100;
 
   // 📱 リスト表示（1行のスリム形式）
   if (isCompact) {
@@ -89,20 +88,41 @@ export const JobCard: React.FC<JobCardProps> = ({
     );
   }
 
-  // 🎴 本格カード表示（デザイン完全復活）
+  // 🎴 1枚目のデザイン（「進捗度」「戻す」「スタート/次へ」ボタンUI）
+  const getPhaseText = () => {
+    if (phase === 0) return '未着手';
+    if (phase === 4) return '完成！';
+    return `Phase ${phase}`;
+  };
+
+  const getNextButtonText = () => {
+    if (phase === 0) return 'スタート';
+    if (phase === 4) return '完成✨';
+    return '次へ';
+  };
+
   return (
     <div
-      className={`p-4 sm:p-5 rounded-3xl border transition-all duration-200 relative group shadow-sm hover:shadow-md flex flex-col justify-between space-y-4 ${
+      className={`p-4 sm:p-5 rounded-3xl border transition-all duration-200 relative group shadow-sm hover:shadow-md flex flex-col justify-between space-y-3.5 ${
         isDarkMode
           ? 'bg-slate-800 border-slate-700/80'
           : 'bg-white border-slate-100'
       } ${isPinned ? 'ring-2 ring-pink-400/60' : ''}`}
     >
-      {/* 上段：ロールバッジ + ジョブ名 + ピン留め */}
+      {/* 上段：ピン・ロールバッジ・ジョブ名 ＆ 右側：数理表示 */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onTogglePin}
+            className={`text-xs transition-all active:scale-75 ${
+              isPinned ? 'opacity-100 scale-110' : 'opacity-25 hover:opacity-100'
+            }`}
+            title="メインジョブにピン留め"
+          >
+            📌
+          </button>
           <span
-            className={`text-xs font-black tracking-wider px-2.5 py-1 rounded-xl border ${
+            className={`text-[11px] font-black tracking-wider px-2.5 py-0.5 rounded-xl border ${
               isDarkMode
                 ? `${roleStyle.darkBg} ${roleStyle.text} border-slate-700`
                 : `${roleStyle.bg} ${roleStyle.text} ${roleStyle.border}`
@@ -110,58 +130,73 @@ export const JobCard: React.FC<JobCardProps> = ({
           >
             {jobCode}
           </span>
-          <h3 className={`font-bold text-base ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
+          <h3 className={`font-bold text-sm ${isDarkMode ? 'text-slate-100' : 'text-slate-800'}`}>
             {jobName}
           </h3>
         </div>
 
-        <button
-          onClick={onTogglePin}
-          className={`text-base transition-all active:scale-75 ${
-            isPinned ? 'opacity-100 scale-110' : 'opacity-25 hover:opacity-100'
-          }`}
-          title="メインジョブにピン留め"
-        >
-          📌
-        </button>
+        <span className={`text-xs font-bold ${isDarkMode ? 'text-slate-400' : 'text-slate-400'}`}>
+          数理: {tokensLeft.toLocaleString()}個
+        </span>
       </div>
 
-      {/* 中段：進捗テキスト + カード内プログレスバー */}
-      <div className="space-y-1.5">
+      {/* 中段：進捗度ラベル ＆ 4分割セグメントプログレスバー */}
+      <div className="space-y-2">
         <div className="flex items-center justify-between text-xs font-bold">
-          <span className={phase === 4 ? 'text-emerald-500' : 'text-slate-400'}>
-            {phase === 4 ? '✨ 完成！' : `Phase ${phase} / 4`}
-          </span>
-          <span className="text-pink-500">
-            {phase === 4 ? '完了' : `残り ${tokensLeft.toLocaleString()} 数理`}
+          <span className={isDarkMode ? 'text-slate-400' : 'text-slate-400'}>進捗度</span>
+          <span className={phase === 4 ? 'text-emerald-500 font-bold' : phase > 0 ? 'text-pink-500 font-bold' : isDarkMode ? 'text-slate-400' : 'text-slate-500'}>
+            {getPhaseText()}
           </span>
         </div>
 
-        <div className={`w-full h-2 rounded-full overflow-hidden ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}>
-          <div
-            className="h-full bg-gradient-to-r from-pink-400 to-rose-500 transition-all duration-300"
-            style={{ width: `${progressPercent}%` }}
-          />
+        {/* 4分割バー */}
+        <div className="grid grid-cols-4 gap-1.5">
+          {[1, 2, 3, 4].map((segment) => (
+            <div
+              key={segment}
+              className={`h-2.5 rounded-full transition-all duration-300 ${
+                phase >= segment
+                  ? 'bg-gradient-to-r from-pink-400 to-rose-400 shadow-sm'
+                  : isDarkMode
+                  ? 'bg-slate-700/70'
+                  : 'bg-slate-100'
+              }`}
+            />
+          ))}
         </div>
       </div>
 
-      {/* 下段：フェーズ選択ボタン */}
-      <div className="grid grid-cols-5 gap-1.5 pt-1">
-        {[0, 1, 2, 3, 4].map((p) => (
-          <button
-            key={p}
-            onClick={() => onPhaseChange(p)}
-            className={`py-2 rounded-xl text-xs font-black transition-all active:scale-95 ${
-              phase === p
-                ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-md ring-2 ring-pink-300/30'
-                : isDarkMode
-                ? 'bg-slate-700/60 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
-                : 'bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-slate-700'
-            }`}
-          >
-            {p === 4 ? '✨' : p}
-          </button>
-        ))}
+      {/* 下段：「戻す」＆「スタート/次へ」ボタン */}
+      <div className="grid grid-cols-2 gap-2 pt-1">
+        {/* 戻すボタン */}
+        <button
+          onClick={() => onPhaseChange(phase - 1)}
+          disabled={phase === 0}
+          className={`py-2 rounded-2xl text-xs font-bold transition-all active:scale-95 ${
+            phase === 0
+              ? isDarkMode
+                ? 'bg-slate-800/40 text-slate-600 border border-slate-700/50 cursor-not-allowed'
+                : 'bg-slate-50 text-slate-300 border border-slate-100 cursor-not-allowed'
+              : isDarkMode
+              ? 'bg-slate-700/80 text-slate-200 border border-slate-600 hover:bg-slate-700'
+              : 'bg-slate-100 text-slate-600 border border-slate-200 hover:bg-slate-200'
+          }`}
+        >
+          戻す
+        </button>
+
+        {/* スタート / 次へ ボタン */}
+        <button
+          onClick={() => onPhaseChange(phase + 1)}
+          disabled={phase === 4}
+          className={`py-2 rounded-2xl text-xs font-bold transition-all ${
+            phase === 4
+              ? 'bg-emerald-500 text-white shadow-sm cursor-default opacity-90'
+              : 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-sm hover:brightness-105 active:scale-95'
+          }`}
+        >
+          {getNextButtonText()}
+        </button>
       </div>
     </div>
   );
