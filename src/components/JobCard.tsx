@@ -88,7 +88,7 @@ export const JobCard: React.FC<JobCardProps> = ({
     );
   }
 
-  // 🎴 1枚目のデザイン（「進捗度」「戻す」「スタート/次へ」ボタンUI）
+  // 🎴 カード表示（進捗バーが直接クリック可能なUI）
   const getPhaseText = () => {
     if (phase === 0) return '未着手';
     if (phase === 4) return '完成！';
@@ -140,7 +140,7 @@ export const JobCard: React.FC<JobCardProps> = ({
         </span>
       </div>
 
-      {/* 中段：進捗度ラベル ＆ 4分割セグメントプログレスバー */}
+      {/* 中段：進捗度ラベル ＆ 4分割バー（直接クリック可能） */}
       <div className="space-y-2">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className={isDarkMode ? 'text-slate-400' : 'text-slate-400'}>進捗度</span>
@@ -149,17 +149,20 @@ export const JobCard: React.FC<JobCardProps> = ({
           </span>
         </div>
 
-        {/* 4分割バー */}
+        {/* 4分割プログレスバー（クリックで直接切り替え＆ホバー演出追加） */}
         <div className="grid grid-cols-4 gap-1.5">
           {[1, 2, 3, 4].map((segment) => (
-            <div
+            <button
               key={segment}
-              className={`h-2.5 rounded-full transition-all duration-300 ${
+              type="button"
+              onClick={() => onPhaseChange(phase === segment ? segment - 1 : segment)}
+              title={`Phase ${segment} に変更`}
+              className={`h-3 rounded-full transition-all duration-200 cursor-pointer hover:opacity-80 active:scale-95 ${
                 phase >= segment
                   ? 'bg-gradient-to-r from-pink-400 to-rose-400 shadow-sm'
                   : isDarkMode
-                  ? 'bg-slate-700/70'
-                  : 'bg-slate-100'
+                  ? 'bg-slate-700/70 hover:bg-slate-600'
+                  : 'bg-slate-100 hover:bg-slate-200'
               }`}
             />
           ))}
@@ -168,7 +171,6 @@ export const JobCard: React.FC<JobCardProps> = ({
 
       {/* 下段：「戻す」＆「スタート/次へ」ボタン */}
       <div className="grid grid-cols-2 gap-2 pt-1">
-        {/* 戻すボタン */}
         <button
           onClick={() => onPhaseChange(phase - 1)}
           disabled={phase === 0}
@@ -185,7 +187,6 @@ export const JobCard: React.FC<JobCardProps> = ({
           戻す
         </button>
 
-        {/* スタート / 次へ ボタン */}
         <button
           onClick={() => onPhaseChange(phase + 1)}
           disabled={phase === 4}
