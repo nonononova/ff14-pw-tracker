@@ -76,7 +76,7 @@ export const Dashboard: React.FC = () => {
         <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100">
           <div>
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400 bg-clip-text text-transparent">
-              ✨ PW Tracker
+              🌸 PW Tracker
             </h1>
             <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
               FF14 ファントムウェポン進捗チェックノート
