@@ -41,7 +41,6 @@ export const Dashboard: React.FC = () => {
   const [jobs, setJobs] = useLocalStorage<JobData[]>('ff14_pw_tracker_jobs', INITIAL_JOBS);
   const [activeFilter, setActiveFilter] = useState<FilterRole>('all');
   const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>('ff14_pw_tracker_darkmode', false);
-  const [targetDays, setTargetDays] = useLocalStorage<number>('ff14_pw_tracker_target_days', 30);
 
   const handlePhaseChange = (jobCode: string, newPhase: number) => {
     setJobs((prev) =>
@@ -82,13 +81,14 @@ export const Dashboard: React.FC = () => {
     return sum + (4 - job.phase) * 1500;
   }, 0);
 
+  // 全体達成率
   const MAX_TOKENS = 21 * 4 * 1500;
   const currentTokens = MAX_TOKENS - totalTokensNeeded;
   const progressPercent = Math.round((currentTokens / MAX_TOKENS) * 100);
 
-  const safeTargetDays = Math.max(1, targetDays || 1);
-  const dailyTokensNeeded = Math.ceil(totalTokensNeeded / safeTargetDays);
-  const dailyExRuns = (dailyTokensNeeded / 90).toFixed(1);
+  // 周回数の換算 (Lv100 ID = 50個/周, エキルレ = 90個/日)
+  const idRunsNeeded = Math.ceil(totalTokensNeeded / 50);
+  const exDaysNeeded = Math.ceil(totalTokensNeeded / 90);
 
   const filterTabs: { id: FilterRole; label: string }[] = [
     { id: 'all', label: `すべて (${jobs.length})` },
@@ -171,7 +171,7 @@ export const Dashboard: React.FC = () => {
           </div>
 
           <div className={`pt-4 border-t grid grid-cols-1 md:grid-cols-3 gap-4 items-center ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}>
-            <div className="md:col-span-1 space-y-1.5">
+            <div className="md:col-span-2 space-y-1.5">
               <div className="flex justify-between text-xs font-bold">
                 <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500'}>全体達成率</span>
                 <span className="text-pink-500">{progressPercent}%</span>
@@ -184,37 +184,20 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            <div className={`md:col-span-2 rounded-2xl p-3 border flex flex-wrap items-center justify-between gap-3 text-xs ${
+            <div className={`rounded-2xl p-2.5 border flex items-center justify-around text-center text-xs ${
               isDarkMode ? 'bg-slate-900/80 border-slate-700' : 'bg-slate-50/80 border-slate-100'
             }`}>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-pink-500">📅 目標期間:</span>
-                <input
-                  type="number"
-                  min="1"
-                  max="365"
-                  value={targetDays}
-                  onChange={(e) => setTargetDays(Number(e.target.value))}
-                  className={`w-14 text-center font-bold rounded-lg border py-1 px-1 text-xs focus:outline-none focus:ring-2 focus:ring-pink-400 ${
-                    isDarkMode ? 'bg-slate-800 border-slate-600 text-slate-100' : 'bg-white border-slate-300 text-slate-700'
-                  }`}
-                />
-                <span className="font-medium">日後完成</span>
-              </div>
-
-              <div className="flex items-center gap-4">
-                <div>
-                  <span className="text-[10px] text-slate-400 block">1日あたり必要</span>
-                  <span className="font-extrabold text-pink-500 text-sm">
-                    {totalTokensNeeded === 0 ? '0' : dailyTokensNeeded.toLocaleString()} <span className="text-xs text-slate-400 font-normal">個/日</span>
-                  </span>
+              <div>
+                <div className="text-[10px] text-slate-400 font-medium">Lv100 ID周回</div>
+                <div className={`font-bold ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                  約 <span className="text-pink-500 font-extrabold">{idRunsNeeded}</span> 周
                 </div>
-                <div className={`h-6 w-px ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
-                <div>
-                  <span className="text-[10px] text-slate-400 block">ノルマ目安</span>
-                  <span className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                    エキルレ <span className="text-pink-500 font-bold">{totalTokensNeeded === 0 ? '0' : dailyExRuns}</span> 回/日
-                  </span>
+              </div>
+              <div className={`h-6 w-px ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
+              <div>
+                <div className="text-[10px] text-slate-400 font-medium">エキルレのみ</div>
+                <div className={`font-bold ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                  約 <span className="text-pink-500 font-extrabold">{exDaysNeeded}</span> 日
                 </div>
               </div>
             </div>
