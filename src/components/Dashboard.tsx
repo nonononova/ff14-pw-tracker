@@ -41,10 +41,24 @@ export const Dashboard: React.FC = () => {
   const [jobs, setJobs] = useLocalStorage<JobData[]>('ff14_pw_tracker_jobs', INITIAL_JOBS);
   const [activeFilter, setActiveFilter] = useState<FilterRole>('all');
   const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>('ff14_pw_tracker_darkmode', false);
+  
+  // UI State（表示モード・トースト通知）
+  const [viewMode, setViewMode] = useState<'grid' | 'compact'>('grid');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   const handlePhaseChange = (jobCode: string, newPhase: number) => {
+    const job = jobs.find((j) => j.jobCode === jobCode);
+    if (newPhase === 4 && job && job.phase !== 4) {
+      showToast(`🎉 ${job.jobName}のファントムウェポンが完成しました！`);
+    }
+
     setJobs((prev) =>
-      prev.map((job) => (job.jobCode === jobCode ? { ...job, phase: newPhase } : job))
+      prev.map((j) => (j.jobCode === jobCode ? { ...j, phase: newPhase } : j))
     );
   };
 
@@ -59,6 +73,7 @@ export const Dashboard: React.FC = () => {
   const handleReset = () => {
     if (window.confirm('すべての進捗をリセットしますか？')) {
       setJobs(INITIAL_JOBS);
+      showToast('進捗をリセットしました');
     }
   };
 
@@ -81,16 +96,13 @@ export const Dashboard: React.FC = () => {
     return sum + (4 - job.phase) * 1500;
   }, 0);
 
-  // 全体達成率
   const MAX_TOKENS = 21 * 4 * 1500;
   const currentTokens = MAX_TOKENS - totalTokensNeeded;
   const progressPercent = Math.round((currentTokens / MAX_TOKENS) * 100);
 
-  // 周回数の換算 (Lv100 ID = 50個/周, エキルレ = 90個/日)
   const idRunsNeeded = Math.ceil(totalTokensNeeded / 50);
   const exDaysNeeded = Math.ceil(totalTokensNeeded / 90);
 
-  // 𝕏（Twitter）シェア機能
   const handleShare = () => {
     const text = `✨【FF14】ファントムウェポン作成進捗\n\n・完成数: ${completedCount} / 21本\n・全体達成率: ${progressPercent}%\n・残り数理: ${totalTokensNeeded.toLocaleString()}個\n\n#FF14 #PWTracker #ファントムウェポン\n`;
     const shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(window.location.href)}`;
@@ -109,10 +121,19 @@ export const Dashboard: React.FC = () => {
 
   return (
     <div
-      className={`min-h-screen transition-colors duration-300 p-4 sm:p-6 lg:p-8 font-sans selection:bg-pink-200 ${
+      className={`min-h-screen transition-colors duration-300 p-4 sm:p-6 lg:p-8 font-sans selection:bg-pink-200 relative ${
         isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-slate-50/60 text-slate-700'
       }`}
     >
+      {/* 🔔 トースト通知ポップアップ */}
+      {toastMessage && (
+        <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 animate-bounce">
+          <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 text-white font-bold px-6 py-3 rounded-full shadow-lg text-xs sm:text-sm border border-white/20">
+            {toastMessage}
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto space-y-6">
         <header
           className={`p-5 sm:p-6 rounded-3xl shadow-sm border transition-colors duration-300 space-y-5 ${
@@ -164,7 +185,6 @@ export const Dashboard: React.FC = () => {
                 </div>
               </div>
 
-              {/* 𝕏 シェアボタン */}
               <button
                 onClick={handleShare}
                 className="text-xs px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-sm transition-all active:scale-95 flex items-center gap-1.5"
@@ -219,25 +239,48 @@ export const Dashboard: React.FC = () => {
           </div>
         </header>
 
-        <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 no-scrollbar">
-          {filterTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveFilter(tab.id)}
-              className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-95 ${
-                activeFilter === tab.id
-                  ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-pink-200/50'
-                  : isDarkMode
-                  ? 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'
-                  : 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* 🎛️ フィルター ＆ 表示切替バー */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 no-scrollbar flex-1">
+            {filterTabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveFilter(tab.id)}
+                className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-95 ${
+                  activeFilter === tab.id
+                    ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-pink-200/50'
+                    : isDarkMode
+                    ? 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'
+                    : 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* 🎛️ グリッド/コンパクト切替 */}
+          <button
+            onClick={() => setViewMode(viewMode === 'grid' ? 'compact' : 'grid')}
+            className={`px-3 py-2 text-xs font-bold rounded-2xl border transition-all active:scale-95 shrink-0 ${
+              isDarkMode
+                ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+            }`}
+            title={viewMode === 'grid' ? 'コンパクト表示にする' : '標準カード表示にする'}
+          >
+            {viewMode === 'grid' ? '📱 コンパクト' : '🎴 カード'}
+          </button>
         </div>
 
-        <main className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {/* 🎴 ジョブ一覧表示 */}
+        <main
+          className={
+            viewMode === 'grid'
+              ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+              : 'grid grid-cols-1 md:grid-cols-2 gap-2'
+          }
+        >
           {sortedJobs.map((job) => (
             <JobCard
               key={job.jobCode}
