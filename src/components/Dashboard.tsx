@@ -237,6 +237,15 @@ export const Dashboard: React.FC = () => {
             />
           ))}
         </main>
+
+        {/* フッター（権利表記・免責事項） */}
+        <footer className={`pt-8 pb-4 text-center text-[11px] leading-relaxed space-y-1 ${
+          isDarkMode ? 'text-slate-500' : 'text-slate-400'
+        }`}>
+          <p>※当サイトは個人が作成した非公式のファンメイドツールです。</p>
+          <p>記載されている会社名・製品名・システム名などは、各社の商標、または登録商標です。</p>
+          <p className="font-medium pt-1">(C) SQUARE ENIX CO., LTD. All Rights Reserved.</p>
+        </footer>
       </div>
     </div>
   );
