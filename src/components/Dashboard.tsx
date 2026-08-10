@@ -8,41 +8,52 @@ export interface JobData {
   jobName: string;
   role: Role;
   phase: number;
+  isPinned?: boolean;
 }
 
 const INITIAL_JOBS: JobData[] = [
-  { jobCode: 'PLD', jobName: 'ナイト', role: 'tank', phase: 0 },
-  { jobCode: 'WAR', jobName: '戦士', role: 'tank', phase: 0 },
-  { jobCode: 'DRK', jobName: '暗黒騎士', role: 'tank', phase: 0 },
-  { jobCode: 'GNB', jobName: 'ガンブレイカー', role: 'tank', phase: 0 },
-  { jobCode: 'WHM', jobName: '白魔道士', role: 'healer', phase: 0 },
-  { jobCode: 'SCH', jobName: '学者', role: 'healer', phase: 0 },
-  { jobCode: 'AST', jobName: '占星術師', role: 'healer', phase: 0 },
-  { jobCode: 'SGE', jobName: '賢者', role: 'healer', phase: 0 },
-  { jobCode: 'MNK', jobName: 'モンク', role: 'melee', phase: 0 },
-  { jobCode: 'DRG', jobName: '竜騎士', role: 'melee', phase: 0 },
-  { jobCode: 'NIN', jobName: '忍者', role: 'melee', phase: 0 },
-  { jobCode: 'SAM', jobName: '侍', role: 'melee', phase: 0 },
-  { jobCode: 'RPR', jobName: 'リーパー', role: 'melee', phase: 0 },
-  { jobCode: 'VPR', jobName: 'ヴァイパー', role: 'melee', phase: 0 },
-  { jobCode: 'BRD', jobName: '吟遊詩人', role: 'ranged', phase: 0 },
-  { jobCode: 'MCH', jobName: '機工士', role: 'ranged', phase: 0 },
-  { jobCode: 'DNC', jobName: '踊り子', role: 'ranged', phase: 0 },
-  { jobCode: 'BLM', jobName: '黒魔道士', role: 'caster', phase: 0 },
-  { jobCode: 'SMN', jobName: '召喚士', role: 'caster', phase: 0 },
-  { jobCode: 'RDM', jobName: '赤魔道士', role: 'caster', phase: 0 },
-  { jobCode: 'PCT', jobName: 'ピクトマンサー', role: 'caster', phase: 0 },
+  { jobCode: 'PLD', jobName: 'ナイト', role: 'tank', phase: 0, isPinned: false },
+  { jobCode: 'WAR', jobName: '戦士', role: 'tank', phase: 0, isPinned: false },
+  { jobCode: 'DRK', jobName: '暗黒騎士', role: 'tank', phase: 0, isPinned: false },
+  { jobCode: 'GNB', jobName: 'ガンブレイカー', role: 'tank', phase: 0, isPinned: false },
+  { jobCode: 'WHM', jobName: '白魔道士', role: 'healer', phase: 0, isPinned: false },
+  { jobCode: 'SCH', jobName: '学者', role: 'healer', phase: 0, isPinned: false },
+  { jobCode: 'AST', jobName: '占星術師', role: 'healer', phase: 0, isPinned: false },
+  { jobCode: 'SGE', jobName: '賢者', role: 'healer', phase: 0, isPinned: false },
+  { jobCode: 'MNK', jobName: 'モンク', role: 'melee', phase: 0, isPinned: false },
+  { jobCode: 'DRG', jobName: '竜騎士', role: 'melee', phase: 0, isPinned: false },
+  { jobCode: 'NIN', jobName: '忍者', role: 'melee', phase: 0, isPinned: false },
+  { jobCode: 'SAM', jobName: '侍', role: 'melee', phase: 0, isPinned: false },
+  { jobCode: 'RPR', jobName: 'リーパー', role: 'melee', phase: 0, isPinned: false },
+  { jobCode: 'VPR', jobName: 'ヴァイパー', role: 'melee', phase: 0, isPinned: false },
+  { jobCode: 'BRD', jobName: '吟遊詩人', role: 'ranged', phase: 0, isPinned: false },
+  { jobCode: 'MCH', jobName: '機工士', role: 'ranged', phase: 0, isPinned: false },
+  { jobCode: 'DNC', jobName: '踊り子', role: 'ranged', phase: 0, isPinned: false },
+  { jobCode: 'BLM', jobName: '黒魔道士', role: 'caster', phase: 0, isPinned: false },
+  { jobCode: 'SMN', jobName: '召喚士', role: 'caster', phase: 0, isPinned: false },
+  { jobCode: 'RDM', jobName: '赤魔道士', role: 'caster', phase: 0, isPinned: false },
+  { jobCode: 'PCT', jobName: 'ピクトマンサー', role: 'caster', phase: 0, isPinned: false },
 ];
 
-type FilterRole = 'all' | Role;
+type FilterRole = 'all' | 'pinned' | Role;
 
 export const Dashboard: React.FC = () => {
   const [jobs, setJobs] = useLocalStorage<JobData[]>('ff14_pw_tracker_jobs', INITIAL_JOBS);
   const [activeFilter, setActiveFilter] = useState<FilterRole>('all');
+  const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>('ff14_pw_tracker_darkmode', false);
+  const [targetDays, setTargetDays] = useLocalStorage<number>('ff14_pw_tracker_target_days', 30);
 
   const handlePhaseChange = (jobCode: string, newPhase: number) => {
     setJobs((prev) =>
       prev.map((job) => (job.jobCode === jobCode ? { ...job, phase: newPhase } : job))
+    );
+  };
+
+  const handleTogglePin = (jobCode: string) => {
+    setJobs((prev) =>
+      prev.map((job) =>
+        job.jobCode === jobCode ? { ...job, isPinned: !Boolean(job.isPinned) } : job
+      )
     );
   };
 
@@ -52,8 +63,18 @@ export const Dashboard: React.FC = () => {
     }
   };
 
-  const filteredJobs =
-    activeFilter === 'all' ? jobs : jobs.filter((job) => job.role === activeFilter);
+  const pinnedCount = jobs.filter((job) => Boolean(job.isPinned)).length;
+
+  const filteredJobs = jobs.filter((job) => {
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'pinned') return Boolean(job.isPinned);
+    return job.role === activeFilter;
+  });
+
+  const sortedJobs = [...filteredJobs].sort((a, b) => {
+    if (activeFilter === 'pinned') return 0;
+    return (b.isPinned ? 1 : 0) - (a.isPinned ? 1 : 0);
+  });
 
   const completedCount = jobs.filter((job) => job.phase === 4).length;
   const totalTokensNeeded = jobs.reduce((sum, job) => {
@@ -61,17 +82,17 @@ export const Dashboard: React.FC = () => {
     return sum + (4 - job.phase) * 1500;
   }, 0);
 
-  // 全体達成率 (全21ジョブ完了に必要な全トークン数: 21 * 4 * 1500 = 126,000)
   const MAX_TOKENS = 21 * 4 * 1500;
   const currentTokens = MAX_TOKENS - totalTokensNeeded;
   const progressPercent = Math.round((currentTokens / MAX_TOKENS) * 100);
 
-  // 周回数の換算 (Lv100 ID = 50個/周, エキルレ = 90個/日)
-  const idRunsNeeded = Math.ceil(totalTokensNeeded / 50);
-  const exDaysNeeded = Math.ceil(totalTokensNeeded / 90);
+  const safeTargetDays = Math.max(1, targetDays || 1);
+  const dailyTokensNeeded = Math.ceil(totalTokensNeeded / safeTargetDays);
+  const dailyExRuns = (dailyTokensNeeded / 90).toFixed(1);
 
   const filterTabs: { id: FilterRole; label: string }[] = [
     { id: 'all', label: `すべて (${jobs.length})` },
+    { id: 'pinned', label: `📌 メイン (${pinnedCount})` },
     { id: 'tank', label: 'TANK' },
     { id: 'healer', label: 'HEALER' },
     { id: 'melee', label: 'MELEE' },
@@ -80,30 +101,57 @@ export const Dashboard: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50/60 text-slate-700 p-4 sm:p-6 lg:p-8 font-sans selection:bg-pink-200">
+    <div
+      className={`min-h-screen transition-colors duration-300 p-4 sm:p-6 lg:p-8 font-sans selection:bg-pink-200 ${
+        isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-slate-50/60 text-slate-700'
+      }`}
+    >
       <div className="max-w-7xl mx-auto space-y-6">
-        <header className="bg-white p-5 sm:p-6 rounded-3xl shadow-sm border border-slate-100 space-y-5">
+        <header
+          className={`p-5 sm:p-6 rounded-3xl shadow-sm border transition-colors duration-300 space-y-5 ${
+            isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-100'
+          }`}
+        >
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400 bg-clip-text text-transparent">
-                ✨ PW Tracker
-              </h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400 bg-clip-text text-transparent">
+                  ✨ PW Tracker
+                </h1>
+                <button
+                  onClick={() => setIsDarkMode(!isDarkMode)}
+                  className={`px-3 py-1 text-xs font-bold rounded-full border transition-all active:scale-95 ${
+                    isDarkMode
+                      ? 'bg-slate-700 border-slate-600 text-amber-300 hover:bg-slate-600'
+                      : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
+                  }`}
+                  title="テーマ切り替え"
+                >
+                  {isDarkMode ? '🌙 ダーク' : '☀️ ライト'}
+                </button>
+              </div>
               <p className="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
                 FF14 ファントムウェポン進捗チェックノート
               </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-4 bg-pink-50/60 border border-pink-100 p-3 px-4 rounded-2xl">
-                <div className="text-right border-r border-pink-200/60 pr-4">
+              <div
+                className={`flex items-center gap-4 p-3 px-4 rounded-2xl border ${
+                  isDarkMode
+                    ? 'bg-slate-900/60 border-slate-700'
+                    : 'bg-pink-50/60 border-pink-100'
+                }`}
+              >
+                <div className="text-right border-r border-pink-200/40 pr-4">
                   <div className="text-[10px] text-pink-400 font-bold uppercase tracking-wider">完成</div>
-                  <div className="text-base font-extrabold text-pink-600">
+                  <div className="text-base font-extrabold text-pink-500">
                     {completedCount} <span className="text-xs text-slate-400 font-normal">/ 21</span>
                   </div>
                 </div>
                 <div>
                   <div className="text-[10px] text-pink-400 font-bold uppercase tracking-wider">残り数理</div>
-                  <div className="text-base font-extrabold text-slate-700">
+                  <div className={`text-base font-extrabold ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                     {totalTokensNeeded.toLocaleString()}
                   </div>
                 </div>
@@ -111,22 +159,24 @@ export const Dashboard: React.FC = () => {
 
               <button
                 onClick={handleReset}
-                className="text-xs px-3 py-2 rounded-xl bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200 transition-colors font-medium shadow-sm"
+                className={`text-xs px-3 py-2 rounded-xl border font-medium shadow-sm transition-colors ${
+                  isDarkMode
+                    ? 'bg-slate-700 border-slate-600 text-slate-400 hover:text-rose-400 hover:border-rose-900'
+                    : 'bg-white border-slate-200 text-slate-400 hover:text-rose-500 hover:border-rose-200'
+                }`}
               >
                 リセット
               </button>
             </div>
           </div>
 
-          {/* 追加部分：全体進捗バー & 周回目安 */}
-          <div className="pt-2 border-t border-slate-100 grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-            {/* 達成率プログレスバー */}
-            <div className="md:col-span-2 space-y-1.5">
+          <div className={`pt-4 border-t grid grid-cols-1 md:grid-cols-3 gap-4 items-center ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}>
+            <div className="md:col-span-1 space-y-1.5">
               <div className="flex justify-between text-xs font-bold">
-                <span className="text-slate-500">全体達成率</span>
-                <span className="text-pink-600">{progressPercent}%</span>
+                <span className={isDarkMode ? 'text-slate-400' : 'text-slate-500'}>全体達成率</span>
+                <span className="text-pink-500">{progressPercent}%</span>
               </div>
-              <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/50">
+              <div className={`w-full h-3 rounded-full overflow-hidden p-0.5 border ${isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-slate-100 border-slate-200/50'}`}>
                 <div
                   className="h-full bg-gradient-to-r from-pink-400 via-rose-400 to-amber-400 rounded-full transition-all duration-500 shadow-sm"
                   style={{ width: `${progressPercent}%` }}
@@ -134,16 +184,38 @@ export const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* 周回目安表示 */}
-            <div className="bg-slate-50/80 rounded-2xl p-2.5 border border-slate-100 flex items-center justify-around text-center text-xs">
-              <div>
-                <div className="text-[10px] text-slate-400 font-medium">Lv100 ID周回</div>
-                <div className="font-bold text-slate-700">約 <span className="text-pink-600 font-extrabold">{idRunsNeeded}</span> 周</div>
+            <div className={`md:col-span-2 rounded-2xl p-3 border flex flex-wrap items-center justify-between gap-3 text-xs ${
+              isDarkMode ? 'bg-slate-900/80 border-slate-700' : 'bg-slate-50/80 border-slate-100'
+            }`}>
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-pink-500">📅 目標期間:</span>
+                <input
+                  type="number"
+                  min="1"
+                  max="365"
+                  value={targetDays}
+                  onChange={(e) => setTargetDays(Number(e.target.value))}
+                  className={`w-14 text-center font-bold rounded-lg border py-1 px-1 text-xs focus:outline-none focus:ring-2 focus:ring-pink-400 ${
+                    isDarkMode ? 'bg-slate-800 border-slate-600 text-slate-100' : 'bg-white border-slate-300 text-slate-700'
+                  }`}
+                />
+                <span className="font-medium">日後完成</span>
               </div>
-              <div className="h-6 w-px bg-slate-200" />
-              <div>
-                <div className="text-[10px] text-slate-400 font-medium">エキルレのみ</div>
-                <div className="font-bold text-slate-700">約 <span className="text-pink-600 font-extrabold">{exDaysNeeded}</span> 日</div>
+
+              <div className="flex items-center gap-4">
+                <div>
+                  <span className="text-[10px] text-slate-400 block">1日あたり必要</span>
+                  <span className="font-extrabold text-pink-500 text-sm">
+                    {totalTokensNeeded === 0 ? '0' : dailyTokensNeeded.toLocaleString()} <span className="text-xs text-slate-400 font-normal">個/日</span>
+                  </span>
+                </div>
+                <div className={`h-6 w-px ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} />
+                <div>
+                  <span className="text-[10px] text-slate-400 block">ノルマ目安</span>
+                  <span className={`font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                    エキルレ <span className="text-pink-500 font-bold">{totalTokensNeeded === 0 ? '0' : dailyExRuns}</span> 回/日
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -156,7 +228,9 @@ export const Dashboard: React.FC = () => {
               onClick={() => setActiveFilter(tab.id)}
               className={`px-4 py-2 rounded-2xl text-xs font-bold transition-all shadow-sm active:scale-95 ${
                 activeFilter === tab.id
-                  ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-pink-200'
+                  ? 'bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-pink-200/50'
+                  : isDarkMode
+                  ? 'bg-slate-800 text-slate-400 border border-slate-700 hover:bg-slate-700'
                   : 'bg-white text-slate-500 border border-slate-100 hover:bg-slate-50'
               }`}
             >
@@ -166,14 +240,17 @@ export const Dashboard: React.FC = () => {
         </div>
 
         <main className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredJobs.map((job) => (
+          {sortedJobs.map((job) => (
             <JobCard
               key={job.jobCode}
               jobCode={job.jobCode}
               jobName={job.jobName}
               role={job.role}
               phase={job.phase}
+              isPinned={Boolean(job.isPinned)}
+              isDarkMode={isDarkMode}
               onPhaseChange={(newPhase) => handlePhaseChange(job.jobCode, newPhase)}
+              onTogglePin={() => handleTogglePin(job.jobCode)}
             />
           ))}
         </main>
