@@ -42,7 +42,6 @@ export const Dashboard: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState<FilterRole>('all');
   const [isDarkMode, setIsDarkMode] = useLocalStorage<boolean>('ff14_pw_tracker_darkmode', false);
   
-  // UI State（表示モード・トースト通知）
   const [viewMode, setViewMode] = useState<'grid' | 'compact'>('grid');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -125,7 +124,6 @@ export const Dashboard: React.FC = () => {
         isDarkMode ? 'bg-slate-900 text-slate-100' : 'bg-slate-50/60 text-slate-700'
       }`}
     >
-      {/* 🔔 トースト通知ポップアップ */}
       {toastMessage && (
         <div className="fixed top-5 left-1/2 -translate-x-1/2 z-50 animate-bounce">
           <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-amber-500 text-white font-bold px-6 py-3 rounded-full shadow-lg text-xs sm:text-sm border border-white/20">
@@ -239,7 +237,6 @@ export const Dashboard: React.FC = () => {
           </div>
         </header>
 
-        {/* 🎛️ フィルター ＆ 表示切替バー */}
         <div className="flex items-center justify-between gap-3">
           <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 no-scrollbar flex-1">
             {filterTabs.map((tab) => (
@@ -259,21 +256,18 @@ export const Dashboard: React.FC = () => {
             ))}
           </div>
 
-          {/* 🎛️ グリッド/コンパクト切替 */}
           <button
             onClick={() => setViewMode(viewMode === 'grid' ? 'compact' : 'grid')}
-            className={`px-3 py-2 text-xs font-bold rounded-2xl border transition-all active:scale-95 shrink-0 ${
+            className={`px-3.5 py-2 text-xs font-bold rounded-2xl border transition-all active:scale-95 shrink-0 ${
               isDarkMode
                 ? 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700'
                 : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
             }`}
-            title={viewMode === 'grid' ? 'コンパクト表示にする' : '標準カード表示にする'}
           >
-            {viewMode === 'grid' ? '📱 コンパクト' : '🎴 カード'}
+            {viewMode === 'grid' ? '📱 リスト表示' : '🎴 カード表示'}
           </button>
         </div>
 
-        {/* 🎴 ジョブ一覧表示 */}
         <main
           className={
             viewMode === 'grid'
@@ -290,6 +284,7 @@ export const Dashboard: React.FC = () => {
               phase={job.phase}
               isPinned={Boolean(job.isPinned)}
               isDarkMode={isDarkMode}
+              isCompact={viewMode === 'compact'}
               onPhaseChange={(newPhase) => handlePhaseChange(job.jobCode, newPhase)}
               onTogglePin={() => handleTogglePin(job.jobCode)}
             />
