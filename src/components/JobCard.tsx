@@ -35,12 +35,15 @@ export const JobCard: React.FC<JobCardProps> = ({
 }) => {
   const roleStyle = ROLE_COLORS[role];
   const tokensLeft = phase === 4 ? 0 : (4 - phase) * 1500;
+  const isCompleted = phase === 4;
 
-  // 📱 リスト表示
+  // 📱 リスト表示（完成時は薄く表示）
   if (isCompact) {
     return (
       <div
         className={`flex items-center justify-between p-2.5 px-3.5 rounded-2xl border transition-all ${
+          isCompleted ? 'opacity-50 hover:opacity-100 grayscale-[20%]' : 'opacity-100'
+        } ${
           isDarkMode
             ? 'bg-slate-800/80 border-slate-700/80 hover:bg-slate-800'
             : 'bg-white border-slate-100 shadow-sm hover:shadow-md'
@@ -66,6 +69,11 @@ export const JobCard: React.FC<JobCardProps> = ({
           <span className={`text-xs font-bold truncate ${isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
             {jobName}
           </span>
+          {isCompleted && (
+            <span className="text-[10px] font-bold text-emerald-500 bg-emerald-50 dark:bg-emerald-950/60 px-1.5 py-0.5 rounded border border-emerald-200/50">
+              COMPLETE
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
@@ -90,7 +98,7 @@ export const JobCard: React.FC<JobCardProps> = ({
     );
   }
 
-  // 🎴 カード表示（進捗バー直接クリック対応）
+  // 🎴 カード表示（完成時は薄く表示＋COMPLETEバッジ追加）
   const getPhaseText = () => {
     if (phase === 0) return '未着手';
     if (phase === 4) return '完成！';
@@ -106,11 +114,20 @@ export const JobCard: React.FC<JobCardProps> = ({
   return (
     <div
       className={`p-4 sm:p-5 rounded-3xl border transition-all duration-200 relative group shadow-sm hover:shadow-md flex flex-col justify-between space-y-3.5 ${
-        isDarkMode
+        isCompleted
+          ? 'opacity-55 hover:opacity-100 bg-slate-50/50 dark:bg-slate-800/40 border-slate-200/60 dark:border-slate-700/50'
+          : isDarkMode
           ? 'bg-slate-800 border-slate-700/80'
           : 'bg-white border-slate-100'
       } ${isPinned ? 'ring-2 ring-pink-400/60' : ''}`}
     >
+      {/* 完成バッジ */}
+      {isCompleted && (
+        <div className="absolute -top-2.5 right-4 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-black px-2.5 py-0.5 rounded-full shadow-sm tracking-wider uppercase">
+          COMPLETE ✨
+        </div>
+      )}
+
       {/* 上段：ピン・ロールバッジ・ジョブ名 ＆ 右側：数理表示 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -143,7 +160,7 @@ export const JobCard: React.FC<JobCardProps> = ({
         </span>
       </div>
 
-      {/* 中段：進捗度 ＆ 4分割バー（クリック可能） */}
+      {/* 中段：進捗度 ＆ 4分割バー */}
       <div className="space-y-1.5">
         <div className="flex items-center justify-between text-xs font-bold">
           <span className={isDarkMode ? 'text-slate-400' : 'text-slate-400'}>進捗度</span>
@@ -152,7 +169,6 @@ export const JobCard: React.FC<JobCardProps> = ({
           </span>
         </div>
 
-        {/* 4分割バー：ボタン化・マウス乗せると光る設定 */}
         <div className="grid grid-cols-4 gap-1.5 py-1">
           {[1, 2, 3, 4].map((segment) => (
             <button
@@ -161,7 +177,9 @@ export const JobCard: React.FC<JobCardProps> = ({
               onClick={() => onPhaseChange(phase === segment ? segment - 1 : segment)}
               className={`h-4 sm:h-3.5 rounded-full transition-all duration-150 cursor-pointer touch-manipulation hover:opacity-80 active:scale-95 ${
                 phase >= segment
-                  ? 'bg-gradient-to-r from-pink-400 to-rose-400 shadow-sm'
+                  ? isCompleted
+                    ? 'bg-gradient-to-r from-emerald-400 to-teal-400 shadow-sm'
+                    : 'bg-gradient-to-r from-pink-400 to-rose-400 shadow-sm'
                   : isDarkMode
                   ? 'bg-slate-700/80 hover:bg-slate-600'
                   : 'bg-slate-100 hover:bg-slate-200'
